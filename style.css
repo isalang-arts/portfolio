@@ -1,0 +1,177 @@
+/* ============================================================
+   TOKENS — a dark editing-suite / lightbox palette. Storyboard
+   artists mark cuts with a red grease pencil on the actual
+   film; that's the one accent color here, used sparingly.
+   Shared by index.html (Portfolio Review) and storyboards.html.
+   ============================================================ */
+:root{
+  --ink:        #14171C;   /* room the lightbox sits in */
+  --stage:      #1B2027;   /* panel / card surface */
+  --stage-2:    #22282F;   /* raised surface (hover, viewer chrome) */
+  --paper:      #ECE7D8;   /* the "paper" a piece is presented on */
+  --grease:     #E8432E;   /* grease-pencil red — the one accent */
+  --grease-dim: #7A2A20;
+  --chalk:      #8B909B;   /* secondary ink on dark */
+  --chalk-brt:  #D7DAE0;   /* primary ink on dark */
+  --lamp:       #F3D77A;   /* warm lightbox glow, used very sparingly */
+  --line:       #2B323B;
+
+  --display: 'Oswald', sans-serif;
+  --body: 'IBM Plex Sans', sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+}
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+html{ scroll-behavior:smooth; }
+body{
+  background:var(--ink);
+  color:var(--chalk-brt);
+  font-family:var(--body);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+img{ max-width:100%; display:block; }
+a{ color:inherit; }
+button{ font-family:inherit; cursor:pointer; }
+
+:focus-visible{
+  outline:2px solid var(--lamp);
+  outline-offset:3px;
+}
+
+.wrap{ max-width:1180px; margin:0 auto; padding:0 32px; }
+
+/* ============================================================
+   NAV — identical markup on every page; .current marks the tab
+   ============================================================ */
+header.nav{
+  position:sticky; top:0; z-index:40;
+  background:rgba(20,23,28,0.86);
+  backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 32px;
+  max-width:1180px; margin:0 auto;
+}
+.brand{ display:flex; align-items:center; gap:12px; text-decoration:none; }
+.brand-mark{
+  width:34px; height:34px; border:2px solid var(--chalk-brt);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:11px; font-weight:500; color:var(--chalk-brt);
+  position:relative;
+}
+.brand-mark::before, .brand-mark::after{
+  content:''; position:absolute; width:5px; height:5px; background:var(--grease); border-radius:50%;
+  top:-2px; left:-2px;
+}
+.brand-mark::after{ top:auto; bottom:-2px; left:auto; right:-2px; }
+.brand-name{
+  font-family:var(--display); font-size:19px; font-weight:600;
+  letter-spacing:0.02em; text-transform:uppercase; color:var(--chalk-brt);
+}
+.brand-name span{ color:var(--grease); }
+nav.links{ display:flex; gap:34px; }
+nav.links a{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:0.06em;
+  text-transform:uppercase; text-decoration:none; color:var(--chalk);
+  transition:color .15s ease;
+}
+nav.links a:hover, nav.links a.current{ color:var(--chalk-brt); }
+nav.links a.current{ color:var(--grease); }
+.nav-toggle{ display:none; background:none; border:none; color:var(--chalk-brt); }
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:0.06em; text-transform:uppercase;
+  padding:13px 22px; border:1px solid var(--chalk); background:transparent; color:var(--chalk-brt);
+  text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+  transition:border-color .15s ease, background .15s ease;
+}
+.btn:hover{ border-color:var(--chalk-brt); }
+.btn.primary{ background:var(--grease); border-color:var(--grease); color:#fff; }
+.btn.primary:hover{ background:#cf3620; border-color:#cf3620; }
+
+/* ============================================================
+   SECTION HEADS
+   ============================================================ */
+.section{ padding:88px 0; border-top:1px solid var(--line); }
+.section-head{
+  display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:44px; gap:24px;
+}
+.section-head h2{
+  font-family:var(--display); text-transform:uppercase; font-weight:600;
+  font-size:clamp(24px,3vw,32px); letter-spacing:0.01em;
+}
+.section-head p{ color:var(--chalk); font-size:14.5px; max-width:36ch; }
+.eyebrow{
+  font-family:var(--mono); font-size:12.5px; letter-spacing:0.14em;
+  color:var(--grease); text-transform:uppercase; margin-bottom:16px;
+  display:flex; align-items:center; gap:10px;
+}
+.eyebrow::before{ content:''; width:22px; height:1px; background:var(--grease); }
+
+/* ============================================================
+   UPLOAD — "load a new piece" / "load a new take"
+   ============================================================ */
+.upload-zone{
+  border:1px dashed var(--line); background:var(--stage);
+  padding:48px 32px; text-align:center; position:relative;
+  transition:border-color .15s ease, background .15s ease;
+}
+.upload-zone.drag{ border-color:var(--grease); background:var(--stage-2); }
+.clapper{ width:56px; height:40px; margin:0 auto 20px; position:relative; }
+.clapper svg{ width:100%; height:100%; }
+.upload-zone h3{
+  font-family:var(--display); text-transform:uppercase; font-size:18px; margin-bottom:8px;
+}
+.upload-zone p{ color:var(--chalk); font-size:14px; margin-bottom:22px; }
+.upload-zone input[type=file]{ display:none; }
+.upload-hint{
+  margin-top:18px; font-family:var(--mono); font-size:11px; color:var(--chalk); letter-spacing:0.03em;
+}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about-grid{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:56px; }
+.about-grid p{ color:var(--chalk); font-size:15.5px; margin-bottom:16px; max-width:52ch; }
+.about-grid p:last-child{ margin-bottom:0; }
+.specs{ display:grid; grid-template-columns:1fr 1fr; gap:20px 32px; align-content:start; }
+.spec dt{ font-family:var(--mono); font-size:10.5px; color:var(--grease); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px; }
+.spec dd{ font-size:15px; color:var(--chalk-brt); }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{ border-top:1px solid var(--line); padding:36px 0; }
+.footer-inner{ display:flex; justify-content:space-between; align-items:center; }
+.footer-inner p{ font-family:var(--mono); font-size:11.5px; color:var(--chalk); }
+.footer-links{ display:flex; gap:22px; }
+.footer-links a{ font-family:var(--mono); font-size:11.5px; color:var(--chalk); text-decoration:none; }
+.footer-links a:hover{ color:var(--chalk-brt); }
+
+/* ============================================================
+   RESPONSIVE (shared rules — page-specific ones live inline)
+   ============================================================ */
+@media (max-width:920px){
+  nav.links{ display:none; }
+  .nav-toggle{ display:block; }
+  .about-grid{ grid-template-columns:1fr; }
+}
+@media (max-width:600px){
+  .wrap, .nav-inner{ padding-left:20px; padding-right:20px; }
+  .section{ padding:64px 0; }
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; scroll-behavior:auto !important; }
+}
+
+.fade-up{ animation:fadeUp .6s ease both; }
+.fade-up.d1{ animation-delay:.08s; }
+.fade-up.d2{ animation-delay:.16s; }
+@keyframes fadeUp{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio Review — Your Name</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ============================================================
+     PAGE HERO — simple intro, no viewer. The gallery is the
+     centerpiece of this page, not the hero.
+     ============================================================ */
+  .page-hero{ padding:88px 0 64px; text-align:left; }
+  .page-hero h1{
+    font-family:var(--display); font-weight:600;
+    font-size:clamp(34px,5vw,58px);
+    line-height:1.05; letter-spacing:-0.01em;
+    text-transform:uppercase; color:var(--chalk-brt);
+    max-width:18ch;
+  }
+  .page-hero p.lede{ margin-top:22px; color:var(--chalk); font-size:16.5px; max-width:48ch; }
+  .page-hero-actions{ margin-top:32px; display:flex; gap:14px; flex-wrap:wrap; }
+
+  /* ============================================================
+     REEL GALLERY — the signature element. One art piece fills
+     the viewport at a time; scroll or swipe snaps to the next,
+     the same way Instagram Reels moves through a vertical feed.
+     ============================================================ */
+  .reel-gallery{
+    position:relative;
+    height:100vh;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+    background:var(--ink);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+  }
+  .reel-gallery::-webkit-scrollbar{ display:none; }
+  .reel-item{
+    height:100vh; width:100%;
+    scroll-snap-align:start; scroll-snap-stop:always;
+    position:relative;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .reel-media{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .reel-media svg{ height:100%; width:auto; max-width:100%; }
+  .reel-media img{ height:100%; width:auto; max-width:100%; object-fit:contain; }
+  .reel-item::after{
+    /* legibility gradient behind the caption, like Reels' UI */
+    content:''; position:absolute; left:0; right:0; bottom:0; height:34%;
+    background:linear-gradient(to top, rgba(10,12,15,0.75), transparent);
+    pointer-events:none;
+  }
+  .reel-caption{
+    position:absolute; left:28px; right:88px; bottom:34px; z-index:2;
+  }
+  .reel-caption .num{
+    font-family:var(--mono); font-size:11px; color:var(--grease); letter-spacing:0.08em;
+  }
+  .reel-caption h3{
+    font-family:var(--display); text-transform:uppercase; font-size:22px; letter-spacing:0.01em;
+    margin-top:6px; color:#fff;
+  }
+  .reel-caption p{
+    font-family:var(--mono); font-size:12px; color:rgba(255,255,255,0.7); margin-top:6px; letter-spacing:0.03em;
+  }
+
+  /* right-edge progress rail, echoes the sprocket/frame-counter
+     motif used for storyboards — the two pages read as one site */
+  .reel-progress{
+    position:absolute; top:50%; right:24px; transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:7px; z-index:3;
+  }
+  .reel-progress i{
+    width:3px; height:16px; background:var(--line); display:block; border-radius:2px;
+    transition:background .2s ease, height .2s ease;
+  }
+  .reel-progress i.on{ background:var(--grease); height:24px; }
+
+  .reel-nav{
+    position:absolute; bottom:28px; right:24px; z-index:3;
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .reel-nav button{
+    width:36px; height:36px; border:1px solid rgba(255,255,255,0.25); background:rgba(20,23,28,0.55);
+    color:#fff; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
+  }
+  .reel-nav button:hover{ border-color:var(--grease); color:var(--grease); }
+
+  .reel-cue{
+    position:absolute; left:28px; bottom:34px; z-index:2;
+    font-family:var(--mono); font-size:11px; letter-spacing:0.08em; color:rgba(255,255,255,0.6);
+    display:flex; align-items:center; gap:8px;
+    opacity:1; transition:opacity .4s ease;
+  }
+  .reel-cue.hide{ opacity:0; }
+  .reel-cue svg{ width:12px; height:12px; animation:bob 1.6s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(4px);} }
+
+  @media (max-width:920px){
+    .hero-grid{ grid-template-columns:1fr; }
+  }
+  @media (max-width:600px){
+    .reel-caption{ right:60px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark">SB</div>
+      <div class="brand-name">Your Name <span>/ Portfolio</span></div>
+    </a>
+    <nav class="links">
+      <a href="#gallery" class="current">Portfolio</a>
+      <a href="storyboards.html">Storyboards</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<section class="page-hero">
+  <div class="wrap fade-up">
+    <p class="eyebrow">Portfolio review</p>
+    <h1>Selected work, one piece at a time.</h1>
+    <p class="lede">Scroll through the reel below the way you'd flip through a review book — each piece full screen, in order. Replace the placeholder pieces with your own art, then drop new ones in any time from the upload panel underneath.</p>
+    <div class="page-hero-actions">
+      <a href="#gallery" class="btn primary">Start the reel</a>
+      <a href="storyboards.html" class="btn">See storyboard work →</a>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="reel-gallery" id="reel-gallery"></div>
+  <div class="reel-progress" id="reel-progress"></div>
+  <div class="reel-nav">
+    <button id="reel-up" aria-label="Previous piece">↑</button>
+    <button id="reel-down" aria-label="Next piece">↓</button>
+  </div>
+  <div class="reel-cue" id="reel-cue">
+    Scroll for more
+    <svg viewBox="0 0 12 12" fill="none"><path d="M2 4L6 8L10 4" stroke="currentColor" stroke-width="1.5"/></svg>
+  </div>
+</section>
+
+<section class="section" id="upload">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Add to the reel</h2>
+      <p>Drop new pieces in — they're added to the end of the scroll above, in the order you select them.</p>
+    </div>
+    <div class="upload-zone" id="drop-zone">
+      <div class="clapper">
+        <svg viewBox="0 0 56 40" fill="none">
+          <rect x="1" y="10" width="54" height="29" stroke="#8B909B" stroke-width="2"/>
+          <path d="M1 10L9 1H49L55 10" stroke="#8B909B" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M6 10L12 2M17 10L23 2M28 10L34 2M39 10L45 2" stroke="#E8432E" stroke-width="2"/>
+        </svg>
+      </div>
+      <h3>Drop art here</h3>
+      <p>JPG, PNG, or WebP. You'll be asked for a title after you add each batch.</p>
+      <label class="btn primary" for="file-input" style="cursor:pointer;">Choose files</label>
+      <input type="file" id="file-input" accept="image/*" multiple>
+      <p class="upload-hint">This template holds new uploads in the browser only. Wire the drop zone's handleFiles() function to your backend or storage bucket so pieces persist for visitors after a refresh.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="about">
+  <div class="wrap about-grid">
+    <div>
+      <div class="section-head" style="margin-bottom:20px;">
+        <h2>About</h2>
+      </div>
+      <p>Swap this in for your own bio — what you make, the media you work in, and what you want people to understand about your practice before they reach out.</p>
+      <p>If you review for clients or galleries, mention how you like feedback delivered and how fast you turn around revisions.</p>
+    </div>
+    <dl class="specs">
+      <div class="spec"><dt>Based in</dt><dd>Your city</dd></div>
+      <div class="spec"><dt>Media</dt><dd>Your materials</dd></div>
+      <div class="spec"><dt>Available for</dt><dd>Commissions / reviews</dd></div>
+      <div class="spec"><dt>Representation</dt><dd>On request</dd></div>
+    </dl>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap footer-inner">
+    <p>© <span id="year"></span> Your Name</p>
+    <div class="footer-links">
+      <a href="mailto:you@example.com">Email</a>
+      <a href="#">Instagram</a>
+      <a href="storyboards.html">Storyboards</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   PLACEHOLDER PIECES — abstract studies built from the site's
+   own palette, standing in for real artwork. Swap these out by
+   replacing PIECES with your own images (see handleFiles below
+   for the shape each entry needs).
+   ============================================================ */
+function piece(title, medium, year, svg){
+  return { title, medium, year, type:'svg', markup: svg };
+}
+
+const PIECES = [
+  piece('Undertow', 'Ink & wash', '2024', `
+    <svg viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="900" height="1200" fill="#1B2027"/>
+      <rect y="700" width="900" height="500" fill="#22282F"/>
+      <path d="M0 700 C 200 650, 400 760, 900 690 L900 1200 L0 1200 Z" fill="#14171C"/>
+      <circle cx="650" cy="330" r="120" fill="#F3D77A" opacity="0.85"/>
+      <path d="M0 900 C 250 860, 550 930, 900 880" stroke="#E8432E" stroke-width="3" fill="none" opacity="0.7"/>
+    </svg>`),
+  piece('Night Shift, Study', 'Graphite', '2024', `
+    <svg viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="900" height="1200" fill="#14171C"/>
+      <rect x="120" y="180" width="660" height="840" fill="none" stroke="#8B909B" stroke-width="1" opacity="0.4"/>
+      <circle cx="450" cy="470" r="90" fill="none" stroke="#ECE7D8" stroke-width="2.5"/>
+      <path d="M370 620 Q450 500 530 620" fill="none" stroke="#ECE7D8" stroke-width="2.5"/>
+      <path d="M120 900 H780" stroke="#E8432E" stroke-width="2" stroke-dasharray="8 6"/>
+      <text x="150" y="1050" font-family="IBM Plex Mono, monospace" font-size="14" fill="#8B909B">STUDY — HAND, RESTING</text>
+    </svg>`),
+  piece('Coastal Line', 'Gouache', '2023', `
+    <svg viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="900" height="1200" fill="#ECE7D8"/>
+      <rect y="640" width="900" height="560" fill="#22282F"/>
+      <rect y="600" width="900" height="40" fill="#14171C"/>
+      <circle cx="220" cy="260" r="70" fill="#E8432E" opacity="0.9"/>
+      <path d="M0 640 C 300 600, 600 660, 900 610" fill="none" stroke="#14171C" stroke-width="3"/>
+    </svg>`),
+  piece('Figure, Turning', 'Charcoal', '2025', `
+    <svg viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="900" height="1200" fill="#1B2027"/>
+      <ellipse cx="450" cy="380" rx="70" ry="85" fill="none" stroke="#D7DAE0" stroke-width="2.5"/>
+      <path d="M380 460 Q450 620 400 800 M520 460 Q450 620 500 800" fill="none" stroke="#D7DAE0" stroke-width="2.5"/>
+      <path d="M300 900 H600" stroke="#E8432E" stroke-width="2" opacity="0.7"/>
+      <text x="150" y="1080" font-family="IBM Plex Mono, monospace" font-size="14" fill="#8B909B">FIGURE — 8 MIN POSE</text>
+    </svg>`),
+  piece('Interior, Blue Hour', 'Digital', '2025', `
+    <svg viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="900" height="1200" fill="#14171C"/>
+      <rect x="0" y="0" width="900" height="1200" fill="url(#g)"/>
+      <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#22282F"/><stop offset="1" stop-color="#14171C"/></linearGradient></defs>
+      <rect x="180" y="200" width="220" height="320" fill="#F3D77A" opacity="0.15"/>
+      <rect x="180" y="200" width="220" height="320" fill="none" stroke="#F3D77A" stroke-width="2" opacity="0.6"/>
+      <path d="M120 900 H780" stroke="#8B909B" stroke-width="1" opacity="0.4"/>
+    </svg>`),
+  piece('Marks for Tidewater', 'Mixed media', '2024', `
+    <svg viewBox="0 0 900 1200" xmlns="http://www.w3.org/2000/svg">
+      <rect width="900" height="1200" fill="#ECE7D8"/>
+      <path d="M100 300 H800" stroke="#14171C" stroke-width="1" opacity="0.3"/>
+      <path d="M100 340 H800" stroke="#14171C" stroke-width="1" opacity="0.3"/>
+      <circle cx="330" cy="560" r="55" fill="none" stroke="#14171C" stroke-width="2.5"/>
+      <path d="M280 640 Q330 570 380 640" fill="none" stroke="#14171C" stroke-width="2.5"/>
+      <path d="M550 500 H820" stroke="#E8432E" stroke-width="2" marker-end="url(#arw)"/>
+      <defs><marker id="arw" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#E8432E"/></marker></defs>
+      <text x="120" y="900" font-family="IBM Plex Mono, monospace" font-size="14" fill="#14171C" opacity="0.6">SKETCHBOOK — REF FOR SC.03</text>
+    </svg>`)
+];
+
+/* ============================================================
+   RENDER — the reel
+   ============================================================ */
+const galleryEl = document.getElementById('reel-gallery');
+const progressEl = document.getElementById('reel-progress');
+const cueEl = document.getElementById('reel-cue');
+let observer;
+
+function pieceMedia(p){
+  return p.type === 'svg' ? p.markup : `<img src="${p.src}" alt="">`;
+}
+
+function buildItem(p, i){
+  const item = document.createElement('article');
+  item.className = 'reel-item';
+  item.dataset.index = i;
+  item.innerHTML = `
+    <div class="reel-media">${pieceMedia(p)}</div>
+    <div class="reel-caption">
+      <div class="num">${String(i+1).padStart(2,'0')} / ${String(PIECES.length).padStart(2,'0')}</div>
+      <h3>${p.title}</h3>
+      <p>${p.medium} — ${p.year}</p>
+    </div>`;
+  return item;
+}
+
+function renderGallery(){
+  galleryEl.innerHTML = '';
+  progressEl.innerHTML = '';
+  PIECES.forEach((p, i) => {
+    galleryEl.appendChild(buildItem(p, i));
+    const dot = document.createElement('i');
+    if(i === 0) dot.classList.add('on');
+    progressEl.appendChild(dot);
+  });
+  setupObserver();
+}
+
+function setupObserver(){
+  if(observer) observer.disconnect();
+  observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting && entry.intersectionRatio > 0.6){
+        const idx = Number(entry.target.dataset.index);
+        [...progressEl.children].forEach((dot, i) => dot.classList.toggle('on', i === idx));
+      }
+    });
+  }, { root: galleryEl, threshold: [0.6] });
+  [...galleryEl.children].forEach(el => observer.observe(el));
+}
+
+function scrollStep(delta){
+  const items = [...galleryEl.children];
+  const current = items.findIndex(el => {
+    const r = el.getBoundingClientRect();
+    const gr = galleryEl.getBoundingClientRect();
+    return Math.abs(r.top - gr.top) < gr.height * 0.5;
+  });
+  const next = Math.min(Math.max((current === -1 ? 0 : current) + delta, 0), items.length - 1);
+  items[next].scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+document.getElementById('reel-up').addEventListener('click', () => scrollStep(-1));
+document.getElementById('reel-down').addEventListener('click', () => scrollStep(1));
+
+galleryEl.addEventListener('scroll', () => cueEl.classList.add('hide'), { once:true });
+
+document.addEventListener('keydown', e => {
+  const rect = galleryEl.getBoundingClientRect();
+  const inView = rect.top < window.innerHeight * 0.6 && rect.bottom > window.innerHeight * 0.4;
+  if(!inView) return;
+  if(e.key === 'ArrowDown' || e.key === 'PageDown'){ e.preventDefault(); scrollStep(1); }
+  if(e.key === 'ArrowUp' || e.key === 'PageUp'){ e.preventDefault(); scrollStep(-1); }
+});
+
+/* ============================================================
+   UPLOAD — adds new pieces to the end of the reel.
+   Held in memory only; see the hint text in the upload panel.
+   ============================================================ */
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+['dragenter','dragover'].forEach(evt =>
+  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drag'); })
+);
+['dragleave','drop'].forEach(evt =>
+  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drag'); })
+);
+dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(fileList){
+  const files = [...fileList].filter(f => f.type.startsWith('image/'));
+  if(!files.length) return;
+
+  const readers = files.map(file => new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ src: reader.result });
+    reader.readAsDataURL(file);
+  }));
+
+  Promise.all(readers).then(results => {
+    results.forEach((r, n) => {
+      const title = prompt('Title this piece:', 'Untitled') || 'Untitled';
+      // TODO: replace this in-memory push with a POST to your backend/storage
+      // so the piece is still there for visitors after they refresh the page.
+      PIECES.push({ title, medium:'—', year:new Date().getFullYear(), type:'image', src:r.src });
+    });
+    renderGallery();
+    document.querySelectorAll('.reel-item')[PIECES.length - results.length].scrollIntoView({ behavior:'smooth' });
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.getElementById('year').textContent = new Date().getFullYear();
+renderGallery();
+</script>
+</body>
+</html>

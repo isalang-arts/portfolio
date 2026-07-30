@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storyboards — Your Name</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* ============================================================
+     HERO — the flip-viewer is this page's thesis, front and
+     center, the same way it was on the old single-page template.
+     ============================================================ */
+  .hero{ padding:72px 0 96px; position:relative; overflow:hidden; }
+  .hero::before{
+    content:''; position:absolute; inset:0;
+    background:radial-gradient(ellipse 900px 500px at 50% 8%, rgba(243,215,122,0.06), transparent 65%);
+    pointer-events:none;
+  }
+  .hero-grid{ display:grid; grid-template-columns:1fr 1.15fr; gap:56px; align-items:center; }
+  .hero h1{
+    font-family:var(--display); font-weight:600;
+    font-size:clamp(34px,4.4vw,52px);
+    line-height:1.06; letter-spacing:-0.01em;
+    text-transform:uppercase; color:var(--chalk-brt);
+    max-width:15ch;
+  }
+  .hero p.lede{ margin-top:22px; color:var(--chalk); font-size:16.5px; max-width:42ch; }
+  .hero-actions{ margin-top:32px; display:flex; gap:14px; flex-wrap:wrap; }
+
+  .stage-frame{ background:var(--stage); border:1px solid var(--line); padding:18px; position:relative; }
+  .sprocket-row{ display:flex; justify-content:space-between; padding:0 4px 14px; }
+  .sprocket-row span{ width:7px; height:7px; background:var(--line); border-radius:1px; }
+
+  .viewer-canvas{ background:var(--paper); aspect-ratio:16/10; position:relative; overflow:hidden; border:1px solid var(--line); }
+  .viewer-canvas svg{ width:100%; height:100%; display:block; }
+  .viewer-canvas img{ width:100%; height:100%; object-fit:cover; }
+
+  .frame-meta{ display:flex; justify-content:space-between; align-items:baseline; margin-top:14px; font-family:var(--mono); font-size:11.5px; color:var(--chalk); }
+  .frame-counter{ color:var(--lamp); letter-spacing:0.04em; }
+  .frame-caption{ margin-top:10px; font-size:14px; color:var(--chalk-brt); min-height:22px; }
+  .stage-controls{ display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
+  .arrow-btn{
+    width:38px; height:38px; border:1px solid var(--line); background:var(--stage-2);
+    color:var(--chalk-brt); display:flex; align-items:center; justify-content:center;
+    transition:border-color .15s ease, color .15s ease;
+  }
+  .arrow-btn:hover{ border-color:var(--grease); color:var(--grease); }
+  .stage-controls .dots{ display:flex; gap:6px; }
+  .stage-controls .dots i{ width:6px; height:6px; background:var(--line); display:block; border-radius:50%; }
+  .stage-controls .dots i.on{ background:var(--grease); }
+
+  /* ============================================================
+     REELS GRID (project cards)
+     ============================================================ */
+  .reels{ display:grid; grid-template-columns:repeat(3,1fr); gap:26px; }
+  .reel-card{
+    background:var(--stage); border:1px solid var(--line); cursor:pointer;
+    transition:border-color .2s ease, transform .2s ease;
+    display:flex; flex-direction:column;
+  }
+  .reel-card:hover{ border-color:var(--grease); transform:translateY(-3px); }
+  .reel-thumb{ aspect-ratio:16/10; background:var(--paper); position:relative; overflow:hidden; }
+  .reel-thumb svg, .reel-thumb img{ width:100%; height:100%; object-fit:cover; }
+  .reel-tag{
+    position:absolute; top:10px; left:10px; background:var(--ink); color:var(--lamp);
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.06em; padding:3px 8px; text-transform:uppercase;
+  }
+  .reel-scribble{ position:absolute; inset:0; opacity:0; transition:opacity .2s ease; pointer-events:none; }
+  .reel-card:hover .reel-scribble{ opacity:1; }
+  .reel-body{ padding:18px 18px 20px; }
+  .reel-body h3{ font-family:var(--display); font-size:18px; text-transform:uppercase; letter-spacing:0.01em; margin-bottom:6px; }
+  .reel-meta{ font-family:var(--mono); font-size:11.5px; color:var(--chalk); letter-spacing:0.03em; display:flex; gap:14px; }
+
+  /* ============================================================
+     FULLSCREEN VIEWER — flip through any reel
+     ============================================================ */
+  .viewer-overlay{
+    position:fixed; inset:0; background:rgba(10,12,15,0.96); z-index:100;
+    display:none; flex-direction:column;
+  }
+  .viewer-overlay.open{ display:flex; }
+  .viewer-top{ display:flex; justify-content:space-between; align-items:center; padding:20px 32px; border-bottom:1px solid var(--line); }
+  .viewer-title{ font-family:var(--display); text-transform:uppercase; font-size:16px; letter-spacing:0.02em; }
+  .viewer-title span{ color:var(--chalk); font-family:var(--mono); font-size:12px; text-transform:none; margin-left:12px; }
+  .viewer-close{
+    background:none; border:1px solid var(--line); color:var(--chalk-brt);
+    width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+  }
+  .viewer-close:hover{ border-color:var(--grease); color:var(--grease); }
+
+  .viewer-main{ flex:1; display:flex; align-items:center; justify-content:center; gap:20px; padding:24px 32px; min-height:0; }
+  .viewer-nav-btn{
+    width:46px; height:46px; flex-shrink:0; border:1px solid var(--line); background:var(--stage);
+    color:var(--chalk-brt); display:flex; align-items:center; justify-content:center;
+  }
+  .viewer-nav-btn:hover{ border-color:var(--grease); color:var(--grease); }
+  .viewer-stage-wrap{ height:100%; max-width:900px; width:100%; display:flex; flex-direction:column; justify-content:center; }
+  .viewer-canvas-big{ background:var(--paper); aspect-ratio:16/10; border:1px solid var(--line); overflow:hidden; position:relative; }
+  .viewer-canvas-big svg, .viewer-canvas-big img{ width:100%; height:100%; object-fit:cover; }
+  .viewer-info{ display:flex; justify-content:space-between; margin-top:16px; font-family:var(--mono); font-size:12px; color:var(--chalk); }
+  .viewer-caption{ margin-top:10px; font-size:15px; color:var(--chalk-brt); min-height:20px; }
+
+  .filmstrip{ border-top:1px solid var(--line); padding:16px 32px; display:flex; gap:10px; overflow-x:auto; }
+  .filmstrip::-webkit-scrollbar{ height:6px; }
+  .filmstrip::-webkit-scrollbar-thumb{ background:var(--line); }
+  .film-thumb{
+    width:84px; aspect-ratio:16/10; flex-shrink:0; background:var(--paper); border:2px solid transparent;
+    cursor:pointer; overflow:hidden; opacity:0.55; transition:opacity .15s ease, border-color .15s ease;
+  }
+  .film-thumb.active{ opacity:1; border-color:var(--grease); }
+  .film-thumb:hover{ opacity:1; }
+  .film-thumb svg, .film-thumb img{ width:100%; height:100%; object-fit:cover; }
+
+  @media (max-width:920px){
+    .hero-grid{ grid-template-columns:1fr; }
+    .reels{ grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width:600px){
+    .reels{ grid-template-columns:1fr; }
+    .viewer-main{ padding:16px; gap:10px; }
+    .viewer-nav-btn{ width:36px; height:36px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">
+      <div class="brand-mark">SB</div>
+      <div class="brand-name">Your Name <span>/ Portfolio</span></div>
+    </a>
+    <nav class="links">
+      <a href="index.html">Portfolio</a>
+      <a href="storyboards.html" class="current">Storyboards</a>
+      <a href="index.html#about">About</a>
+      <a href="index.html#contact">Contact</a>
+    </nav>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="fade-up">
+      <p class="eyebrow">Frame by frame</p>
+      <h1>Storyboards that hold up before the camera does.</h1>
+      <p class="lede">Every reel below is a full sequence — open one to flip through it panel by panel, the same way clients will. Replace this copy and the reels with your own work.</p>
+      <div class="hero-actions">
+        <a href="#reels" class="btn primary">View reels</a>
+        <a href="#upload" class="btn">Upload a storyboard</a>
+      </div>
+    </div>
+
+    <div class="fade-up d1">
+      <div class="stage-frame">
+        <div class="sprocket-row">
+          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="viewer-canvas" id="hero-canvas"></div>
+        <div class="frame-meta">
+          <span>REEL — TIDEWATER, SH. 03</span>
+          <span class="frame-counter" id="hero-counter">FRAME 01 / 05</span>
+        </div>
+        <p class="frame-caption" id="hero-caption"></p>
+        <div class="stage-controls">
+          <button class="arrow-btn" id="hero-prev" aria-label="Previous frame">←</button>
+          <div class="dots" id="hero-dots"></div>
+          <button class="arrow-btn" id="hero-next" aria-label="Next frame">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="reels">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Reels</h2>
+      <p>Every project below is a full sequence. Open one to flip through it panel by panel, same as your uploads will work.</p>
+    </div>
+    <div class="reels" id="reel-grid"></div>
+  </div>
+</section>
+
+<section class="section" id="upload">
+  <div class="wrap">
+    <div class="section-head">
+      <h2>Load a new take</h2>
+      <p>Drag panels in, in the order they should play. They'll appear in the grid above, ready to flip through.</p>
+    </div>
+    <div class="upload-zone" id="drop-zone">
+      <div class="clapper">
+        <svg viewBox="0 0 56 40" fill="none">
+          <rect x="1" y="10" width="54" height="29" stroke="#8B909B" stroke-width="2"/>
+          <path d="M1 10L9 1H49L55 10" stroke="#8B909B" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M6 10L12 2M17 10L23 2M28 10L34 2M39 10L45 2" stroke="#E8432E" stroke-width="2"/>
+        </svg>
+      </div>
+      <h3>Drop storyboard images here</h3>
+      <p>Or choose files — JPG, PNG, WebP. They'll be added in the order you select them.</p>
+      <label class="btn primary" for="file-input" style="cursor:pointer;">Choose files</label>
+      <input type="file" id="file-input" accept="image/*" multiple>
+      <p class="upload-hint">This template holds new uploads in the browser only. Wire the drop zone's handleFiles() function to your backend or storage bucket to make reels persist for visitors.</p>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap footer-inner">
+    <p>© <span id="year"></span> Your Name — Storyboard Artist</p>
+    <div class="footer-links">
+      <a href="mailto:you@example.com">Email</a>
+      <a href="index.html">Portfolio</a>
+      <a href="#">IMDb</a>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ FULLSCREEN FLIP VIEWER ============ -->
+<div class="viewer-overlay" id="viewer-overlay">
+  <div class="viewer-top">
+    <div class="viewer-title" id="viewer-title">Reel <span id="viewer-meta"></span></div>
+    <button class="viewer-close" id="viewer-close" aria-label="Close viewer">✕</button>
+  </div>
+  <div class="viewer-main">
+    <button class="viewer-nav-btn" id="viewer-prev" aria-label="Previous frame">←</button>
+    <div class="viewer-stage-wrap">
+      <div class="viewer-canvas-big" id="viewer-canvas"></div>
+      <div class="viewer-info">
+        <span id="viewer-counter">FRAME 01 / 01</span>
+        <span>← → to flip · Esc to close</span>
+      </div>
+      <p class="viewer-caption" id="viewer-caption"></p>
+    </div>
+    <button class="viewer-nav-btn" id="viewer-next" aria-label="Next frame">→</button>
+  </div>
+  <div class="filmstrip" id="viewer-filmstrip"></div>
+</div>
+
+<script>
+/* ============================================================
+   FRAME LIBRARY — simple storyboard-notation panels (subject
+   silhouette + camera-move arrow + shot label) used to fill
+   the demo reels below. Replace deck.frames with your own
+   images once you've customized the reels.
+   ============================================================ */
+let panelCount = 0;
+function svgPanel({ label, move, note, markerId }){
+  return `
+  <svg viewBox="0 0 320 200" xmlns="http://www.w3.org/2000/svg">
+    <defs><marker id="${markerId}" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#E8432E"/></marker></defs>
+    <rect width="320" height="200" fill="#ECE7D8"/>
+    <rect x="6" y="6" width="308" height="188" fill="none" stroke="#14171C" stroke-width="1.5" opacity="0.35"/>
+    <line x1="6" y1="150" x2="314" y2="150" stroke="#14171C" stroke-width="1" opacity="0.25"/>
+    <circle cx="150" cy="110" r="20" fill="none" stroke="#14171C" stroke-width="2.5"/>
+    <path d="M120 150 Q150 105 180 150" fill="none" stroke="#14171C" stroke-width="2.5"/>
+    ${move(markerId)}
+    <text x="14" y="26" font-family="IBM Plex Mono, monospace" font-size="11" fill="#14171C" opacity="0.55">${label}</text>
+    <text x="14" y="190" font-family="IBM Plex Mono, monospace" font-size="9" fill="#E8432E">${note}</text>
+  </svg>`;
+}
+const ARROW_PAN   = id => `<path d="M60 60 H260" stroke="#E8432E" stroke-width="2" marker-end="url(#${id})" stroke-dasharray="6 4"/>`;
+const ARROW_PUSH  = id => `<path d="M40 30 L120 100" stroke="#E8432E" stroke-width="2" marker-end="url(#${id})"/><path d="M280 30 L200 100" stroke="#E8432E" stroke-width="2" marker-end="url(#${id})"/>`;
+const ARROW_TILT  = id => `<path d="M40 175 V40" stroke="#E8432E" stroke-width="2" marker-end="url(#${id})" stroke-dasharray="6 4"/>`;
+const ARROW_STILL = () => ``;
+
+function frame(label, move, note){
+  panelCount += 1;
+  const markerId = 'arrow-' + panelCount;
+  return { type:'svg', markup: svgPanel({label, move, note, markerId}) };
+}
+
+const DECKS = [
+  {
+    id:'tidewater', tag:'Short film', title:'Tidewater', meta:['Live action','5 panels','2025'],
+    frames:[
+      frame('SC.03 / SH.01', ARROW_PAN,  'Wide — hero enters frame left'),
+      frame('SC.03 / SH.02', ARROW_PUSH, 'Push in on reaction'),
+      frame('SC.03 / SH.03', ARROW_STILL,'Static two-shot, dialogue'),
+      frame('SC.04 / SH.01', ARROW_TILT, 'Tilt up to reveal the storm'),
+      frame('SC.04 / SH.02', ARROW_STILL,'Close on hands, final beat'),
+    ]
+  },
+  {
+    id:'solstice', tag:'Commercial', title:'Solstice Watch', meta:['30s spot','4 panels','2025'],
+    frames:[
+      frame('SPOT / SH.01', ARROW_STILL,'Product on turntable, hero light'),
+      frame('SPOT / SH.02', ARROW_PUSH, 'Macro push on dial detail'),
+      frame('SPOT / SH.03', ARROW_PAN,  'Pan across lifestyle scene'),
+      frame('SPOT / SH.04', ARROW_STILL,'Logo lockup, end card'),
+    ]
+  },
+  {
+    id:'nightshift', tag:'TV pilot', title:'Night Shift', meta:['Pilot, ep.1','5 panels','2024'],
+    frames:[
+      frame('SC.11 / SH.01', ARROW_TILT, 'Tilt down from skyline to street'),
+      frame('SC.11 / SH.02', ARROW_PAN,  'Pan following the patrol car'),
+      frame('SC.12 / SH.01', ARROW_STILL,'Interior, tense two-shot'),
+      frame('SC.12 / SH.02', ARROW_PUSH, 'Push in, whip reveal'),
+      frame('SC.13 / SH.01', ARROW_STILL,'Wide, cut to black'),
+    ]
+  }
+];
+
+function frameMarkup(f){
+  return f.type === 'svg' ? f.markup : `<img src="${f.src}" alt="">`;
+}
+
+/* ============================================================
+   RENDER — reel grid
+   ============================================================ */
+const grid = document.getElementById('reel-grid');
+
+function renderGrid(){
+  grid.innerHTML = '';
+  DECKS.forEach((deck, i) => {
+    const card = document.createElement('article');
+    card.className = 'reel-card';
+    card.tabIndex = 0;
+    card.setAttribute('role','button');
+    card.setAttribute('aria-label', `Open ${deck.title} storyboard`);
+    card.innerHTML = `
+      <div class="reel-thumb">
+        <span class="reel-tag">${deck.tag}</span>
+        ${frameMarkup(deck.frames[0])}
+        <svg class="reel-scribble" viewBox="0 0 320 200"><ellipse cx="160" cy="100" rx="120" ry="60" fill="none" stroke="#E8432E" stroke-width="3" opacity="0.85" transform="rotate(-4 160 100)"/></svg>
+      </div>
+      <div class="reel-body">
+        <h3>${deck.title}</h3>
+        <div class="reel-meta"><span>${deck.meta[0]}</span><span>${deck.meta[1]}</span><span>${deck.meta[2]}</span></div>
+      </div>`;
+    card.addEventListener('click', () => openViewer(i));
+    card.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); openViewer(i); } });
+    grid.appendChild(card);
+  });
+}
+
+/* ============================================================
+   HERO MINI-VIEWER (Tidewater, auto-loaded)
+   ============================================================ */
+let heroIndex = 0;
+const heroDeck = DECKS[0];
+const heroCanvas = document.getElementById('hero-canvas');
+const heroCounter = document.getElementById('hero-counter');
+const heroCaption = document.getElementById('hero-caption');
+const heroDots = document.getElementById('hero-dots');
+const captions = ['Wide — hero enters frame left','Push in on reaction','Static two-shot, dialogue','Tilt up to reveal the storm','Close on hands, final beat'];
+
+function renderHero(){
+  heroCanvas.innerHTML = frameMarkup(heroDeck.frames[heroIndex]);
+  heroCounter.textContent = `FRAME ${String(heroIndex+1).padStart(2,'0')} / ${String(heroDeck.frames.length).padStart(2,'0')}`;
+  heroCaption.textContent = captions[heroIndex];
+  heroDots.innerHTML = heroDeck.frames.map((_,i)=>`<i class="${i===heroIndex?'on':''}"></i>`).join('');
+}
+document.getElementById('hero-prev').addEventListener('click', ()=>{ heroIndex = (heroIndex-1+heroDeck.frames.length)%heroDeck.frames.length; renderHero(); });
+document.getElementById('hero-next').addEventListener('click', ()=>{ heroIndex = (heroIndex+1)%heroDeck.frames.length; renderHero(); });
+renderHero();
+
+/* ============================================================
+   FULLSCREEN VIEWER — flip through any reel, SpeakerDeck-style
+   ============================================================ */
+const overlay = document.getElementById('viewer-overlay');
+const vCanvas = document.getElementById('viewer-canvas');
+const vCounter = document.getElementById('viewer-counter');
+const vCaption = document.getElementById('viewer-caption');
+const vTitle = document.getElementById('viewer-title');
+const vMeta = document.getElementById('viewer-meta');
+const vFilmstrip = document.getElementById('viewer-filmstrip');
+
+let activeDeck = null;
+let activeFrame = 0;
+
+function openViewer(deckIndex){
+  activeDeck = DECKS[deckIndex];
+  activeFrame = 0;
+  vTitle.childNodes[0].textContent = activeDeck.title + ' ';
+  vMeta.textContent = `— ${activeDeck.meta.join(' · ')}`;
+  renderFilmstrip();
+  renderViewerFrame();
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeViewer(){
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+function renderViewerFrame(){
+  vCanvas.innerHTML = frameMarkup(activeDeck.frames[activeFrame]);
+  vCounter.textContent = `FRAME ${String(activeFrame+1).padStart(2,'0')} / ${String(activeDeck.frames.length).padStart(2,'0')}`;
+  vCaption.textContent = activeDeck.id==='tidewater' ? captions[activeFrame] : '';
+  [...vFilmstrip.children].forEach((el,i)=> el.classList.toggle('active', i===activeFrame));
+  vFilmstrip.children[activeFrame]?.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+}
+function renderFilmstrip(){
+  vFilmstrip.innerHTML = '';
+  activeDeck.frames.forEach((f, i) => {
+    const t = document.createElement('div');
+    t.className = 'film-thumb';
+    t.innerHTML = frameMarkup(f);
+    t.addEventListener('click', () => { activeFrame = i; renderViewerFrame(); });
+    vFilmstrip.appendChild(t);
+  });
+}
+function step(delta){
+  if(!activeDeck) return;
+  activeFrame = (activeFrame + delta + activeDeck.frames.length) % activeDeck.frames.length;
+  renderViewerFrame();
+}
+
+document.getElementById('viewer-prev').addEventListener('click', ()=>step(-1));
+document.getElementById('viewer-next').addEventListener('click', ()=>step(1));
+document.getElementById('viewer-close').addEventListener('click', closeViewer);
+overlay.addEventListener('click', e => { if(e.target === overlay) closeViewer(); });
+document.addEventListener('keydown', e => {
+  if(!overlay.classList.contains('open')) return;
+  if(e.key === 'ArrowLeft') step(-1);
+  if(e.key === 'ArrowRight') step(1);
+  if(e.key === 'Escape') closeViewer();
+});
+
+let touchX = null;
+vCanvas.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, {passive:true});
+vCanvas.addEventListener('touchend', e => {
+  if(touchX === null) return;
+  const dx = e.changedTouches[0].clientX - touchX;
+  if(Math.abs(dx) > 40) step(dx > 0 ? -1 : 1);
+  touchX = null;
+}, {passive:true});
+
+/* ============================================================
+   UPLOAD — drag & drop or file picker adds a new reel.
+   Frames are read client-side and held in memory; swap the
+   marked line below for an upload to your own backend/CDN so
+   reels persist for visitors after a refresh.
+   ============================================================ */
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+['dragenter','dragover'].forEach(evt =>
+  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drag'); })
+);
+['dragleave','drop'].forEach(evt =>
+  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drag'); })
+);
+dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+function handleFiles(fileList){
+  const files = [...fileList].filter(f => f.type.startsWith('image/'));
+  if(!files.length) return;
+
+  const title = prompt('Title this storyboard:', 'Untitled reel') || 'Untitled reel';
+  const readers = files.map(file => new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ type:'image', src: reader.result });
+    reader.readAsDataURL(file);
+  }));
+
+  Promise.all(readers).then(frames => {
+    // TODO: replace this in-memory push with a POST to your backend/storage
+    // so the reel is still there for visitors after they refresh the page.
+    DECKS.unshift({
+      id: 'upload-' + Date.now(),
+      tag: 'New upload',
+      title,
+      meta: ['Uploaded', `${frames.length} panels`, new Date().getFullYear()],
+      frames
+    });
+    renderGrid();
+    document.getElementById('reels').scrollIntoView({ behavior:'smooth' });
+  });
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.getElementById('year').textContent = new Date().getFullYear();
+renderGrid();
+</script>
+</body>
+</html>

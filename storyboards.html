@@ -147,10 +147,9 @@
     <div class="fade-up">
       <p class="eyebrow">Frame by frame</p>
       <h1>Storyboards that hold up before the camera does.</h1>
-      <p class="lede">Every reel below is a full sequence — open one to flip through it panel by panel, the same way clients will. Replace this copy and the reels with your own work.</p>
+      <p class="lede">Every reel below is a full sequence — open one to flip through it panel by panel, the same way clients will.</p>
       <div class="hero-actions">
         <a href="#reels" class="btn primary">View reels</a>
-        <a href="#upload" class="btn">Upload a storyboard</a>
       </div>
     </div>
 
@@ -179,32 +178,9 @@
   <div class="wrap">
     <div class="section-head">
       <h2>Reels</h2>
-      <p>Every project below is a full sequence. Open one to flip through it panel by panel, same as your uploads will work.</p>
+      <p>Every project below is a full sequence. Open one to flip through it panel by panel.</p>
     </div>
     <div class="reels" id="reel-grid"></div>
-  </div>
-</section>
-
-<section class="section" id="upload">
-  <div class="wrap">
-    <div class="section-head">
-      <h2>Load a new take</h2>
-      <p>Drag panels in, in the order they should play. They'll appear in the grid above, ready to flip through.</p>
-    </div>
-    <div class="upload-zone" id="drop-zone">
-      <div class="clapper">
-        <svg viewBox="0 0 56 40" fill="none">
-          <rect x="1" y="10" width="54" height="29" stroke="#8B909B" stroke-width="2"/>
-          <path d="M1 10L9 1H49L55 10" stroke="#8B909B" stroke-width="2" stroke-linejoin="round"/>
-          <path d="M6 10L12 2M17 10L23 2M28 10L34 2M39 10L45 2" stroke="#E8432E" stroke-width="2"/>
-        </svg>
-      </div>
-      <h3>Drop storyboard images here</h3>
-      <p>Or choose files — JPG, PNG, WebP. They'll be added in the order you select them.</p>
-      <label class="btn primary" for="file-input" style="cursor:pointer;">Choose files</label>
-      <input type="file" id="file-input" accept="image/*" multiple>
-      <p class="upload-hint">This template holds new uploads in the browser only. Wire the drop zone's handleFiles() function to your backend or storage bucket to make reels persist for visitors.</p>
-    </div>
   </div>
 </section>
 
@@ -429,50 +405,6 @@ vCanvas.addEventListener('touchend', e => {
   if(Math.abs(dx) > 40) step(dx > 0 ? -1 : 1);
   touchX = null;
 }, {passive:true});
-
-/* ============================================================
-   UPLOAD — drag & drop or file picker adds a new reel.
-   Frames are read client-side and held in memory; swap the
-   marked line below for an upload to your own backend/CDN so
-   reels persist for visitors after a refresh.
-   ============================================================ */
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-
-['dragenter','dragover'].forEach(evt =>
-  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drag'); })
-);
-['dragleave','drop'].forEach(evt =>
-  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drag'); })
-);
-dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
-
-function handleFiles(fileList){
-  const files = [...fileList].filter(f => f.type.startsWith('image/'));
-  if(!files.length) return;
-
-  const title = prompt('Title this storyboard:', 'Untitled reel') || 'Untitled reel';
-  const readers = files.map(file => new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = () => resolve({ type:'image', src: reader.result });
-    reader.readAsDataURL(file);
-  }));
-
-  Promise.all(readers).then(frames => {
-    // TODO: replace this in-memory push with a POST to your backend/storage
-    // so the reel is still there for visitors after they refresh the page.
-    DECKS.unshift({
-      id: 'upload-' + Date.now(),
-      tag: 'New upload',
-      title,
-      meta: ['Uploaded', `${frames.length} panels`, new Date().getFullYear()],
-      frames
-    });
-    renderGrid();
-    document.getElementById('reels').scrollIntoView({ behavior:'smooth' });
-  });
-}
 
 /* ============================================================
    INIT

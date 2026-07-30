@@ -131,12 +131,9 @@
 
 <section class="page-hero">
   <div class="wrap fade-up">
-    <p class="eyebrow">Portfolio review</p>
     <h1>Selected work, one piece at a time.</h1>
-    <p class="lede">Scroll through the reel below the way you'd flip through a review book — each piece full screen, in order. Replace the placeholder pieces with your own art, then drop new ones in any time from the upload panel underneath.</p>
     <div class="page-hero-actions">
-      <a href="#gallery" class="btn primary">Start the reel</a>
-      <a href="storyboards.html" class="btn">See storyboard work →</a>
+      <a href="#gallery" class="btn primary">View the work</a>
     </div>
   </div>
 </section>
@@ -154,42 +151,18 @@
   </div>
 </section>
 
-<section class="section" id="upload">
-  <div class="wrap">
-    <div class="section-head">
-      <h2>Add to the reel</h2>
-      <p>Drop new pieces in — they're added to the end of the scroll above, in the order you select them.</p>
-    </div>
-    <div class="upload-zone" id="drop-zone">
-      <div class="clapper">
-        <svg viewBox="0 0 56 40" fill="none">
-          <rect x="1" y="10" width="54" height="29" stroke="#8B909B" stroke-width="2"/>
-          <path d="M1 10L9 1H49L55 10" stroke="#8B909B" stroke-width="2" stroke-linejoin="round"/>
-          <path d="M6 10L12 2M17 10L23 2M28 10L34 2M39 10L45 2" stroke="#E8432E" stroke-width="2"/>
-        </svg>
-      </div>
-      <h3>Drop art here</h3>
-      <p>JPG, PNG, or WebP. You'll be asked for a title after you add each batch.</p>
-      <label class="btn primary" for="file-input" style="cursor:pointer;">Choose files</label>
-      <input type="file" id="file-input" accept="image/*" multiple>
-      <p class="upload-hint">This template holds new uploads in the browser only. Wire the drop zone's handleFiles() function to your backend or storage bucket so pieces persist for visitors after a refresh.</p>
-    </div>
-  </div>
-</section>
-
 <section class="section" id="about">
   <div class="wrap about-grid">
     <div>
       <div class="section-head" style="margin-bottom:20px;">
         <h2>About</h2>
       </div>
-      <p>Swap this in for your own bio — what you make, the media you work in, and what you want people to understand about your practice before they reach out.</p>
-      <p>If you review for clients or galleries, mention how you like feedback delivered and how fast you turn around revisions.</p>
+      <p>I work across ink, digital, and mixed media, moving between quick studies and longer finished pieces. This site is a running record of what I've been making.</p>
     </div>
     <dl class="specs">
-      <div class="spec"><dt>Based in</dt><dd>Your city</dd></div>
-      <div class="spec"><dt>Media</dt><dd>Your materials</dd></div>
-      <div class="spec"><dt>Available for</dt><dd>Commissions / reviews</dd></div>
+      <div class="spec"><dt>Based in</dt><dd>Los Angeles, CA</dd></div>
+      <div class="spec"><dt>Media</dt><dd>Ink, digital, mixed</dd></div>
+      <div class="spec"><dt>Available for</dt><dd>Commissions</dd></div>
       <div class="spec"><dt>Representation</dt><dd>On request</dd></div>
     </dl>
   </div>
@@ -208,10 +181,9 @@
 
 <script>
 /* ============================================================
-   PLACEHOLDER PIECES — abstract studies built from the site's
-   own palette, standing in for real artwork. Swap these out by
-   replacing PIECES with your own images (see handleFiles below
-   for the shape each entry needs).
+   PIECES — abstract studies built from the site's own palette,
+   standing in for real artwork. Replace the entries below with
+   your own images: { title, medium, year, type:'image', src }.
    ============================================================ */
 function piece(title, medium, year, svg){
   return { title, medium, year, type:'svg', markup: svg };
@@ -347,44 +319,6 @@ document.addEventListener('keydown', e => {
   if(e.key === 'ArrowDown' || e.key === 'PageDown'){ e.preventDefault(); scrollStep(1); }
   if(e.key === 'ArrowUp' || e.key === 'PageUp'){ e.preventDefault(); scrollStep(-1); }
 });
-
-/* ============================================================
-   UPLOAD — adds new pieces to the end of the reel.
-   Held in memory only; see the hint text in the upload panel.
-   ============================================================ */
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('file-input');
-
-['dragenter','dragover'].forEach(evt =>
-  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('drag'); })
-);
-['dragleave','drop'].forEach(evt =>
-  dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('drag'); })
-);
-dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
-fileInput.addEventListener('change', e => handleFiles(e.target.files));
-
-function handleFiles(fileList){
-  const files = [...fileList].filter(f => f.type.startsWith('image/'));
-  if(!files.length) return;
-
-  const readers = files.map(file => new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = () => resolve({ src: reader.result });
-    reader.readAsDataURL(file);
-  }));
-
-  Promise.all(readers).then(results => {
-    results.forEach((r, n) => {
-      const title = prompt('Title this piece:', 'Untitled') || 'Untitled';
-      // TODO: replace this in-memory push with a POST to your backend/storage
-      // so the piece is still there for visitors after they refresh the page.
-      PIECES.push({ title, medium:'—', year:new Date().getFullYear(), type:'image', src:r.src });
-    });
-    renderGallery();
-    document.querySelectorAll('.reel-item')[PIECES.length - results.length].scrollIntoView({ behavior:'smooth' });
-  });
-}
 
 /* ============================================================
    INIT
